@@ -32,12 +32,13 @@ def init_db():
                     db.add(new_admin)
                     db.commit()
                     print("SUCCESS: Admin user created.")
-                    print("Username: admin")
-                    print("Password: admin123")
                 except Exception as hash_err:
                     print(f"HASH ERROR: Failed to hash password: {hash_err}")
             else:
-                print("INFO: Admin user already exists.")
+                print("INFO: Admin user exists. Resetting password to 'admin123' to ensure sync...")
+                admin.hashed_password = get_password_hash("admin123")
+                db.commit()
+                print("SUCCESS: Admin password reset to 'admin123'.")
         except Exception as seed_err:
             print(f"SEED ERROR: Database operation failed: {seed_err}")
         finally:
