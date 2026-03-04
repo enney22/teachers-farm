@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "our_programs",
+  "info": {
+    "singularName": "our-program",
+    "pluralName": "our-programs",
+    "displayName": "Our Programs"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "blocks"
+    },
+    "Image": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "Icon": {
+      "type": "enumeration",
+      "enum": [
+        "Users",
+        "Graduation",
+        "Cap",
+        "Lightbulb",
+        "School"
+      ]
+    }
+  }
+}

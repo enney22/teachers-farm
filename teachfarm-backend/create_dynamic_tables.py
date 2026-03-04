@@ -1,0 +1,10 @@
+from app.database.database import engine, Base
+from app.models import models
+
+def create_tables():
+    print("Creating new tables for dynamic content...")
+    Base.metadata.create_all(bind=engine)
+    print("Tables created successfully.")
+
+if __name__ == "__main__":
+    create_tables()
