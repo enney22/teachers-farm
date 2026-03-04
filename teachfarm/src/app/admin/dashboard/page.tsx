@@ -118,22 +118,62 @@ export default function AdminDashboard() {
         }
     });
 
-    const createMutation = (endpoint: string, key: string) => useMutation({
+    const teamMutation = useMutation({
         mutationFn: (data: any) => {
-            if (editingItem) return axios.put(`${API_BASE_URL}/admin/${endpoint}/${editingItem.id}`, data, { headers: getHeaders() });
-            return axios.post(`${API_BASE_URL}/admin/${endpoint}`, data, { headers: getHeaders() });
+            if (editingItem) return axios.put(`${API_BASE_URL}/admin/team-members/${editingItem.id}`, data, { headers: getHeaders() });
+            return axios.post(`${API_BASE_URL}/admin/team-members`, data, { headers: getHeaders() });
         },
-        ...mutationOptions(key)
+        ...mutationOptions('admin-team')
     });
-
-    const teamMutation = createMutation('team-members', 'admin-team');
-    const programMutation = createMutation('programs', 'admin-programs');
-    const paymentMutation = createMutation('donations', 'admin-payment');
-    const donorMutation = createMutation('donor-infos', 'admin-donors');
-    const activityMutation = createMutation('activities', 'admin-activities');
-    const serviceMutation = createMutation('services', 'admin-services');
-    const testimonialMutation = createMutation('testimonials', 'admin-testimonials');
-    const pillarMutation = createMutation('core-pillars', 'admin-pillars');
+    const programMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (editingItem) return axios.put(`${API_BASE_URL}/admin/programs/${editingItem.id}`, data, { headers: getHeaders() });
+            return axios.post(`${API_BASE_URL}/admin/programs`, data, { headers: getHeaders() });
+        },
+        ...mutationOptions('admin-programs')
+    });
+    const paymentMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (editingItem) return axios.put(`${API_BASE_URL}/admin/donations/${editingItem.id}`, data, { headers: getHeaders() });
+            return axios.post(`${API_BASE_URL}/admin/donations`, data, { headers: getHeaders() });
+        },
+        ...mutationOptions('admin-payment')
+    });
+    const donorMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (editingItem) return axios.put(`${API_BASE_URL}/admin/donor-infos/${editingItem.id}`, data, { headers: getHeaders() });
+            return axios.post(`${API_BASE_URL}/admin/donor-infos`, data, { headers: getHeaders() });
+        },
+        ...mutationOptions('admin-donors')
+    });
+    const activityMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (editingItem) return axios.put(`${API_BASE_URL}/admin/activities/${editingItem.id}`, data, { headers: getHeaders() });
+            return axios.post(`${API_BASE_URL}/admin/activities`, data, { headers: getHeaders() });
+        },
+        ...mutationOptions('admin-activities')
+    });
+    const serviceMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (editingItem) return axios.put(`${API_BASE_URL}/admin/services/${editingItem.id}`, data, { headers: getHeaders() });
+            return axios.post(`${API_BASE_URL}/admin/services`, data, { headers: getHeaders() });
+        },
+        ...mutationOptions('admin-services')
+    });
+    const testimonialMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (editingItem) return axios.put(`${API_BASE_URL}/admin/testimonials/${editingItem.id}`, data, { headers: getHeaders() });
+            return axios.post(`${API_BASE_URL}/admin/testimonials`, data, { headers: getHeaders() });
+        },
+        ...mutationOptions('admin-testimonials')
+    });
+    const pillarMutation = useMutation({
+        mutationFn: (data: any) => {
+            if (editingItem) return axios.put(`${API_BASE_URL}/admin/core-pillars/${editingItem.id}`, data, { headers: getHeaders() });
+            return axios.post(`${API_BASE_URL}/admin/core-pillars`, data, { headers: getHeaders() });
+        },
+        ...mutationOptions('admin-pillars')
+    });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => {
