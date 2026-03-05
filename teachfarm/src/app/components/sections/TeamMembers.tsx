@@ -47,7 +47,9 @@ export default function TeamMembers() {
   const getImageUrl = (url?: string) => {
     if (!url) return '/placeholder-avatar.jpg';
     if (url.startsWith('http')) return url;
-    return `http://localhost:8000${url}`;
+    // Strip /api from the end of the base URL to get the server root
+    const serverRoot = API_BASE_URL.endsWith('/api') ? API_BASE_URL.slice(0, -4) : API_BASE_URL;
+    return `${serverRoot}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   if (isLoading) return <div className="text-center py-20">Loading team members...</div>;
@@ -67,29 +69,11 @@ export default function TeamMembers() {
 
     // Handle direct URL
     if (image.url) {
-      const url = image.url.startsWith('http') ? image.url : `http://localhost:1337${image.url}`;
       return {
-        src: url,
+        src: getImageUrl(image.url),
         width: image.width || 400,
         height: image.height || 400,
       };
-    }
-
-    // Handle formats
-    if (image.formats) {
-      const format = image.formats.medium ||
-        image.formats.large ||
-        image.formats.small ||
-        image.formats.thumbnail;
-
-      if (format?.url) {
-        const url = format.url.startsWith('http') ? format.url : `http://localhost:1337${format.url}`;
-        return {
-          src: url,
-          width: format.width || 400,
-          height: format.height || 400,
-        };
-      }
     }
 
     return null;

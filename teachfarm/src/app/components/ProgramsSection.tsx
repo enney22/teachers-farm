@@ -15,8 +15,10 @@ interface Program {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 const getImageUrl = (path: string) => {
+  if (!path) return '/placeholder.jpg';
   if (path.startsWith('http')) return path;
-  return path; // Assuming Vercel Blob URLs are full URLs
+  const serverRoot = API_BASE_URL.endsWith('/api') ? API_BASE_URL.slice(0, -4) : API_BASE_URL;
+  return `${serverRoot}${path.startsWith('/') ? '' : '/'}${path}`;
 };
 
 export default function ProgramsSection() {
