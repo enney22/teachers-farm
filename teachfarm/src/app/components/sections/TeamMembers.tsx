@@ -4,7 +4,6 @@
 
 import Image from 'next/image';
 import FadeInSection from '../FadeInSection';
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -17,6 +16,8 @@ export default function TeamMembers() {
       const response = await axios.get(`${API_BASE_URL}/public/team-members`);
       return response.data;
     },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 
   const getImageUrl = (url?: string) => {

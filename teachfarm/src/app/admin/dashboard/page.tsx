@@ -1,10 +1,16 @@
+// src/app/admin/dashboard/page.tsx
+
 "use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { Plus, Trash2, Edit2, LogOut, Loader2, Menu, X, Settings, Image as ImageIcon, Info, Phone, MessageSquare, Layout, GraduationCap, TrendingUp } from 'lucide-react';
+import {
+    Plus, Trash2, Edit2, LogOut, Loader2, Menu, X, Settings,
+    Image as ImageIcon, Info, Phone, MessageSquare, Layout,
+    GraduationCap, TrendingUp, AlertCircle, CheckCircle
+} from 'lucide-react';
 
 import { TeamMemberModal } from './TeamMemberModal';
 import { ProgramModal } from './ProgramModal';
@@ -19,6 +25,7 @@ import { AboutModal } from './AboutModal';
 import { ContactModal } from './ContactModal';
 import { FooterModal } from './FooterModal';
 import { ImpactModal } from './ImpactModal';
+import { ConfirmationModal } from './ConfirmationModal';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -29,6 +36,22 @@ export default function AdminDashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+
+    // Confirmation Modal State
+    const [confirmConfig, setConfirmConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        type?: 'danger' | 'warning' | 'info';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
 
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -40,6 +63,16 @@ export default function AdminDashboard() {
         }
     }, [router]);
 
+    useEffect(() => {
+        if (error || success) {
+            const timer = setTimeout(() => {
+                setError(null);
+                setSuccess(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [error, success]);
+
     const getHeaders = () => ({
         Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
     });
@@ -49,13 +82,16 @@ export default function AdminDashboard() {
         router.push('/admin');
     };
 
-    // Queries
+    // Queries with Caching Optimization
     const createQuery = (key: string, path: string, isAdmin = false) => useQuery({
         queryKey: [key],
         queryFn: async () => {
             const resp = await axios.get(`${API_BASE_URL}/${isAdmin ? 'admin' : 'public'}/${path}`, isAdmin ? { headers: getHeaders() } : {});
             return resp.data;
-        }
+        },
+        staleTime: 60 * 1000, // 1 minute stale time for admin data
+        gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
+        retry: 1, // Fail faster on Render timeouts
     });
 
     const { data: teamMembers, isLoading: loadingTeam } = createQuery('admin-team', 'team-members');
@@ -67,7 +103,6 @@ export default function AdminDashboard() {
     const { data: testimonials, isLoading: loadingTestimonials } = createQuery('admin-testimonials', 'testimonials');
     const { data: pillars, isLoading: loadingPillars } = createQuery('admin-pillars', 'core-pillars');
 
-    // New Dynamic Content Queries
     const { data: heroSlides, isLoading: loadingHero } = createQuery('admin-hero', 'hero-slides', true);
     const { data: aboutSettings, isLoading: loadingAbout } = createQuery('admin-about', 'about-settings', true);
     const { data: contactSettings, isLoading: loadingContact } = createQuery('admin-contact', 'contact-settings', true);
@@ -80,9 +115,11 @@ export default function AdminDashboard() {
             queryClient.invalidateQueries({ queryKey: [key] });
             setIsModalOpen(false);
             setEditingItem(null);
+            setSuccess('Operation completed successfully!');
         },
-        onError: (error: any) => {
-            alert(error.response?.data?.detail || 'Operation failed');
+        onError: (err: any) => {
+            const detail = err.response?.data?.detail || err.message || 'Operation failed';
+            setError(`Error: ${detail}`);
         }
     });
 
@@ -104,8 +141,6 @@ export default function AdminDashboard() {
     const serviceMutation = createMutation('admin-services', 'services');
     const testimonialMutation = createMutation('admin-testimonials', 'testimonials');
     const pillarMutation = createMutation('admin-pillars', 'core-pillars');
-
-    // New Dynamic Content Mutations
     const heroMutation = createMutation('admin-hero', 'hero-slides');
     const aboutMutation = createMutation('admin-about', 'about-settings');
     const contactMutation = createMutation('admin-contact', 'contact-settings');
@@ -142,8 +177,25 @@ export default function AdminDashboard() {
                 impact: 'admin-impact'
             };
             queryClient.invalidateQueries({ queryKey: [keyMap[activeTab]] });
+            setSuccess('Item deleted successfully');
+        },
+        onError: (err: any) => {
+            setError(`Delete failed: ${err.response?.data?.detail || err.message}`);
         }
     });
+
+    const openConfirm = (title: string, message: string, onConfirm: () => void, type: 'danger' | 'warning' | 'info' = 'danger') => {
+        setConfirmConfig({
+            isOpen: true,
+            title,
+            message,
+            onConfirm: () => {
+                onConfirm();
+                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+            },
+            type
+        });
+    };
 
     const handleFormSubmit = (data: any) => {
         const mutations: Record<TabType, any> = {
@@ -161,7 +213,23 @@ export default function AdminDashboard() {
             footer: footerMutation,
             impact: impactMutation
         };
-        mutations[activeTab].mutate(data);
+
+        const action = editingItem ? 'update' : 'create';
+        openConfirm(
+            `Confirm ${action}`,
+            `Are you sure you want to ${action} this ${activeTab} entry?`,
+            () => mutations[activeTab].mutate(data),
+            'info'
+        );
+    };
+
+    const handleDelete = (id: number) => {
+        openConfirm(
+            'Confirm Delete',
+            'This action cannot be undone. Are you sure you want to delete this item?',
+            () => deleteMutation.mutate(id),
+            'danger'
+        );
     };
 
     const isLoading = loadingTeam || loadingPrograms || loadingPayment || loadingDonors ||
@@ -230,6 +298,26 @@ export default function AdminDashboard() {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+            {/* Notifications */}
+            <div className="fixed top-20 right-4 z-[110] space-y-2 max-w-sm">
+                {error && (
+                    <div className="bg-red-50 border-l-4 border-red-500 p-4 shadow-lg rounded-r animate-in slide-in-from-right duration-300">
+                        <div className="flex items-center">
+                            <AlertCircle className="text-red-500 mr-2" size={20} />
+                            <p className="text-sm text-red-700">{error}</p>
+                        </div>
+                    </div>
+                )}
+                {success && (
+                    <div className="bg-green-50 border-l-4 border-green-500 p-4 shadow-lg rounded-r animate-in slide-in-from-right duration-300">
+                        <div className="flex items-center">
+                            <CheckCircle className="text-green-500 mr-2" size={20} />
+                            <p className="text-sm text-green-700">{success}</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             {/* Mobile Header */}
             <div className="md:hidden bg-green-900 p-4 flex justify-between items-center text-white sticky top-0 z-50">
                 <span className="font-bold">Admin Panel</span>
@@ -244,21 +332,21 @@ export default function AdminDashboard() {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <h2 className="hidden md:block text-xl font-bold mb-8">Admin Panel</h2>
-                <nav className="flex-1 space-y-1 overflow-y-auto pr-2 scrollbar-hide mt-12 md:mt-0">
+                <nav className="flex-1 space-y-1 overflow-y-auto pr-2 scrollbar-hide mt-12 md:mt-0 font-medium">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => { setActiveTab(tab.id); setIsSidebarOpen(false); }}
-                            className={`w-full flex items-center p-3 rounded transition-colors text-sm ${activeTab === tab.id ? 'bg-green-700' : 'hover:bg-green-800'}`}
+                            className={`w-full flex items-center p-3 rounded transition-all text-sm ${activeTab === tab.id ? 'bg-green-700 shadow-inner' : 'hover:bg-green-800'}`}
                         >
-                            <span className="mr-3 text-green-300">{tab.icon}</span>
+                            <span className="mr-3 text-green-300 opacity-80">{tab.icon}</span>
                             {tab.label}
                         </button>
                     ))}
                 </nav>
                 <button
                     onClick={handleLogout}
-                    className="mt-6 flex items-center text-red-300 hover:text-red-100 p-2 border-t border-green-800 pt-6"
+                    className="mt-6 flex items-center text-red-300 hover:text-red-100 p-2 border-t border-green-800 pt-6 transition-colors"
                 >
                     <LogOut size={18} className="mr-2" /> Logout
                 </button>
@@ -267,13 +355,13 @@ export default function AdminDashboard() {
             {/* Main Content */}
             <div className="flex-1 p-4 md:p-8 md:ml-64 w-full">
                 <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-                    <h1 className="text-2xl font-bold capitalize">
+                    <h1 className="text-2xl font-bold capitalize text-gray-800">
                         {tabs.find(t => t.id === activeTab)?.label} Management
                     </h1>
                     {!isSettingsTab && activeTab !== 'donors' && (
                         <button
                             onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
-                            className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-lg flex items-center justify-center hover:bg-green-700 transition-all shadow-md active:scale-95"
+                            className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-lg flex items-center justify-center hover:bg-green-700 transition-all shadow-md active:scale-95 font-semibold"
                         >
                             <Plus size={18} className="mr-2" /> Add New
                         </button>
@@ -281,42 +369,43 @@ export default function AdminDashboard() {
                 </header>
 
                 {isLoading ? (
-                    <div className="flex justify-center items-center h-64">
+                    <div className="flex flex-col justify-center items-center h-64 space-y-4">
                         <Loader2 className="animate-spin text-green-600" size={48} />
+                        <p className="text-gray-400 animate-pulse">Loading data...</p>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
                         {/* Desktop Table View */}
                         <div className="hidden lg:block overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-gray-50/50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name/Title</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name/Title</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Details</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-white divide-y divide-gray-100">
                                     {getCurrentData()?.map((item: any) => (
-                                        <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.id || '-'}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{getLabel(item)}</td>
+                                        <tr key={item.id} className="hover:bg-green-50/30 transition-colors group">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 font-mono">{item.id || '-'}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 group-hover:text-green-700 transition-colors">{getLabel(item)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {getDetails(item)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
                                                 <button
                                                     onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
-                                                    className="text-blue-600 hover:text-blue-900 mr-4 p-2 hover:bg-blue-50 rounded-full transition-colors"
+                                                    className="text-blue-600 hover:text-blue-900 mr-4 p-2 hover:bg-blue-50 rounded-full transition-all"
                                                     title="Edit"
                                                 >
                                                     <Edit2 size={18} />
                                                 </button>
                                                 {!isSettingsTab && activeTab !== 'donors' && (
                                                     <button
-                                                        onClick={() => confirm('Are you sure you want to delete this?') && deleteMutation.mutate(item.id)}
-                                                        className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-full transition-colors"
+                                                        onClick={() => handleDelete(item.id)}
+                                                        className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-full transition-all"
                                                         title="Delete"
                                                     >
                                                         <Trash2 size={18} />
@@ -335,20 +424,20 @@ export default function AdminDashboard() {
                                 <div key={item.id} className="p-4 hover:bg-gray-50 transition-colors">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <p className="text-xs text-gray-400 mb-1">ID: {item.id || '-'}</p>
+                                            <p className="text-[10px] text-gray-400 font-mono mb-1">UUID: {item.id || '-'}</p>
                                             <h3 className="font-bold text-gray-900">{getLabel(item)}</h3>
                                         </div>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
-                                                className="p-3 bg-blue-50 text-blue-600 rounded-lg"
+                                                className="p-3 bg-blue-50 text-blue-600 rounded-lg active:scale-95 transition-transform"
                                             >
                                                 <Edit2 size={18} />
                                             </button>
                                             {!isSettingsTab && activeTab !== 'donors' && (
                                                 <button
-                                                    onClick={() => confirm('Are you sure you want to delete this?') && deleteMutation.mutate(item.id)}
-                                                    className="p-3 bg-red-50 text-red-400 rounded-lg"
+                                                    onClick={() => handleDelete(item.id)}
+                                                    className="p-3 bg-red-50 text-red-400 rounded-lg active:scale-95 transition-transform"
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>
@@ -360,17 +449,28 @@ export default function AdminDashboard() {
                             ))}
                         </div>
 
-                        {getCurrentData()?.length === 0 && (
-                            <div className="text-center py-20 text-gray-400">
-                                <ImageIcon size={48} className="mx-auto mb-4 opacity-20" />
-                                <p>No items found. Click "Add New" to get started.</p>
+                        {(!getCurrentData() || getCurrentData().length === 0) && (
+                            <div className="text-center py-24 text-gray-300">
+                                <ImageIcon size={64} className="mx-auto mb-4 opacity-10" />
+                                <p className="text-lg">No items found for this section.</p>
+                                <p className="text-sm">Click "Add New" to populate your content.</p>
                             </div>
                         )}
                     </div>
                 )}
             </div>
 
-            {/* Modals Container - Centralized */}
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmConfig.isOpen}
+                title={confirmConfig.title}
+                message={confirmConfig.message}
+                onConfirm={confirmConfig.onConfirm}
+                onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+                type={confirmConfig.type}
+            />
+
+            {/* Modals Container */}
             <div id="modals">
                 {isModalOpen && (
                     <>
@@ -385,7 +485,7 @@ export default function AdminDashboard() {
                         {activeTab === 'hero' && <HeroSlideModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
                         {activeTab === 'about' && <AboutModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
                         {activeTab === 'contact' && <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
-                        {activeTab === 'footer' && <FooterModal isOpen={isModalOpen} onClose={() => setIsSidebarOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
+                        {activeTab === 'footer' && <FooterModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
                         {activeTab === 'impact' && <ImpactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
                     </>
                 )}

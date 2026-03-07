@@ -1,29 +1,29 @@
+// src/app/components/sections/Services.tsx
+
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import FadeInSection from '../FadeInSection';
-import Link from 'next/link';
-import { BookOpen, Users, Briefcase, ArrowRight, Shield, Star, Heart, Rocket } from 'lucide-react';
+import { Star, BookOpen, Users, Globe, Award, Heart } from 'lucide-react'
+import FadeInSection from '../FadeInSection'
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 const iconMap: Record<string, any> = {
+  Star,
   BookOpen,
   Users,
-  Briefcase,
-  Shield,
-  Star,
-  Heart,
-  Rocket
+  Globe,
+  Award,
+  Heart
 };
 
 interface Service {
   id: number;
   title: string;
   description: string;
-  icon?: string;
+  icon: string;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export default function Services() {
   const { data: services, isLoading, error } = useQuery<Service[]>({
@@ -32,41 +32,42 @@ export default function Services() {
       const response = await axios.get(`${API_BASE_URL}/public/services`);
       return response.data;
     },
+    staleTime: 15 * 60 * 1000,
+    gcTime: 20 * 60 * 1000,
   });
 
   if (isLoading) return (
     <div className="py-20 bg-gray-100 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div className="animate-pulse text-green-600">Loading services...</div>
     </div>
   );
 
   if (error || !services || services.length === 0) return null;
 
   return (
-    <FadeInSection>
-      <section className="bg-gray-100 py-20">
-        <div className="container mx-auto px-4 text-black">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
-          <div className={`grid gap-8 justify-center ${services.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
-              services.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
-                'md:grid-cols-3'
-            }`}>
-            {services.map((service) => {
-              const IconComponent = iconMap[service.icon || 'Star'] || Star;
-              return (
-                <div key={service.id} className="bg-white p-6 rounded-lg shadow-md flex flex-col group hover:shadow-lg transition-shadow">
-                  <IconComponent className="h-12 w-12 text-green-600 mb-4 group-hover:scale-110 transition-transform" />
-                  <h3 className="text-xl font-semibold mb-4">{service.title}</h3>
-                  <p className="mb-6 text-gray-600 flex-1">{service.description}</p>
-                  <Link href="/contact" className="text-green-600 font-medium hover:underline inline-flex items-center mt-auto">
-                    Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+    <section className="bg-gray-100 py-20">
+      <div className="container mx-auto px-4 text-black">
+        <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
+        <div className={`grid gap-8 justify-center ${services.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
+            services.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
+              'md:grid-cols-3'
+          }`}>
+          {services.map((service) => {
+            const IconComponent = iconMap[service.icon || 'Star'] || Star;
+            return (
+              <FadeInSection key={service.id}>
+                <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 h-full border-b-4 border-transparent hover:border-green-600">
+                  <div className="h-12 w-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                    <IconComponent size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-4">{service.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{service.description}</p>
                 </div>
-              );
-            })}
-          </div>
+              </FadeInSection>
+            );
+          })}
         </div>
-      </section>
-    </FadeInSection>
-  );
+      </div>
+    </section>
+  )
 }

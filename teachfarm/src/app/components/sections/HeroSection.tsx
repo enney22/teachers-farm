@@ -28,6 +28,8 @@ export default function HeroSection() {
       const response = await axios.get(`${API_BASE_URL}/public/hero-slides`);
       return response.data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,
   });
 
   const nextSlide = () => {

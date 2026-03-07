@@ -1,3 +1,5 @@
+// src/app/components/sections/ImpactSection.tsx
+
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -30,6 +32,8 @@ export default function Impact() {
       const response = await axios.get(`${API_BASE_URL}/public/impact-stats`);
       return response.data;
     },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 
   if (isLoading) return (
@@ -47,8 +51,8 @@ export default function Impact() {
           <h2 className="text-3xl font-bold text-center mb-12">Our Impact</h2>
         </FadeInSection>
         <div className={`grid gap-8 justify-center ${impactData.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' :
-            impactData.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' :
-              'md:grid-cols-3'
+          impactData.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' :
+            'md:grid-cols-3'
           }`}>
           {impactData.map((impact) => {
             const IconComponent = ICON_MAP[impact.icon] || Star;
