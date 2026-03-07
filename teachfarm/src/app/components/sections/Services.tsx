@@ -47,7 +47,10 @@ export default function Services() {
       <section className="bg-gray-100 py-20">
         <div className="container mx-auto px-4 text-black">
           <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className={`grid gap-8 justify-center ${services.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
+              services.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
+                'md:grid-cols-3'
+            }`}>
             {services.map((service) => {
               const IconComponent = iconMap[service.icon || 'Star'] || Star;
               return (
