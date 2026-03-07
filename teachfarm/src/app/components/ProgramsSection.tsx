@@ -47,12 +47,10 @@ export default function ProgramsSection() {
           <h2 className="text-3xl font-bold text-center mb-12">Our Programs</h2>
         </FadeInSection>
 
-        <div className={`grid gap-8 justify-center ${programs.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
-            programs.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
-              'md:grid-cols-3'
+        <div className={`flex overflow-x-auto pb-8 gap-8 scrollbar-hide ${programs.length <= 2 ? 'justify-center' : 'justify-start lg:grid lg:grid-cols-3 lg:overflow-visible'
           }`}>
           {programs.map((program) => (
-            <FadeInSection key={program.id}>
+            <FadeInSection key={program.id} className="min-w-[300px] flex-shrink-0">
               <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl h-full flex flex-col group">
                 <div className="relative h-48 bg-gray-200 overflow-hidden">
                   {program.image_url ? (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface HeroSlideModalProps {
     isOpen: boolean;
@@ -42,8 +43,9 @@ export function HeroSlideModal({ isOpen, onClose, onSubmit, initialData }: HeroS
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Upload failed');
             setImageUrl(result.url);
+            toast.success('Image uploaded successfully!');
         } catch (error: any) {
-            alert(`Upload failed: ${error.message}`);
+            toast.error(`Upload failed: ${error.message}`);
         } finally {
             setUploading(false);
         }

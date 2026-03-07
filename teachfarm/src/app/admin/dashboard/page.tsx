@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import { toast } from 'sonner';
 import {
     Plus, Trash2, Edit2, LogOut, Loader2, Menu, X, Settings,
     Image as ImageIcon, Info, Phone, MessageSquare, Layout,
@@ -36,10 +37,8 @@ export default function AdminDashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
 
-    // Confirmation Modal State
+    // Confirmation Modal State (Only for Delete now)
     const [confirmConfig, setConfirmConfig] = useState<{
         isOpen: boolean;
         title: string;
@@ -63,16 +62,6 @@ export default function AdminDashboard() {
         }
     }, [router]);
 
-    useEffect(() => {
-        if (error || success) {
-            const timer = setTimeout(() => {
-                setError(null);
-                setSuccess(null);
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [error, success]);
-
     const getHeaders = () => ({
         Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
     });
@@ -80,6 +69,7 @@ export default function AdminDashboard() {
     const handleLogout = () => {
         localStorage.removeItem('admin_token');
         router.push('/admin');
+        toast.info('Logged out successfully');
     };
 
     // Queries with Caching Optimization
@@ -89,9 +79,9 @@ export default function AdminDashboard() {
             const resp = await axios.get(`${API_BASE_URL}/${isAdmin ? 'admin' : 'public'}/${path}`, isAdmin ? { headers: getHeaders() } : {});
             return resp.data;
         },
-        staleTime: 60 * 1000, // 1 minute stale time for admin data
-        gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
-        retry: 1, // Fail faster on Render timeouts
+        staleTime: 60 * 1000,
+        gcTime: 5 * 60 * 1000,
+        retry: 1,
     });
 
     const { data: teamMembers, isLoading: loadingTeam } = createQuery('admin-team', 'team-members');
@@ -115,11 +105,11 @@ export default function AdminDashboard() {
             queryClient.invalidateQueries({ queryKey: [key] });
             setIsModalOpen(false);
             setEditingItem(null);
-            setSuccess('Operation completed successfully!');
+            toast.success('Successfully saved!');
         },
         onError: (err: any) => {
             const detail = err.response?.data?.detail || err.message || 'Operation failed';
-            setError(`Error: ${detail}`);
+            toast.error(`Error: ${detail}`);
         }
     });
 
@@ -177,10 +167,10 @@ export default function AdminDashboard() {
                 impact: 'admin-impact'
             };
             queryClient.invalidateQueries({ queryKey: [keyMap[activeTab]] });
-            setSuccess('Item deleted successfully');
+            toast.success('Item deleted successfully');
         },
         onError: (err: any) => {
-            setError(`Delete failed: ${err.response?.data?.detail || err.message}`);
+            toast.error(`Delete failed: ${err.response?.data?.detail || err.message}`);
         }
     });
 
@@ -214,13 +204,8 @@ export default function AdminDashboard() {
             impact: impactMutation
         };
 
-        const action = editingItem ? 'update' : 'create';
-        openConfirm(
-            `Confirm ${action}`,
-            `Are you sure you want to ${action} this ${activeTab} entry?`,
-            () => mutations[activeTab].mutate(data),
-            'info'
-        );
+        // No confirmation modal for Create/Update, just Save
+        mutations[activeTab].mutate(data);
     };
 
     const handleDelete = (id: number) => {
@@ -275,9 +260,9 @@ export default function AdminDashboard() {
     const getLabel = (item: any) => {
         if (activeTab === 'testimonials') return item.name;
         if (activeTab === 'donors') return item.donorsname;
-        if (activeTab === 'about') return "Main Content";
-        if (activeTab === 'contact') return "Contact Details";
-        if (activeTab === 'footer') return "Footer Links & Text";
+        if (activeTab === 'about') return item.mission_title || "Main Content";
+        if (activeTab === 'contact') return item.email || "Contact Details";
+        if (activeTab === 'footer') return item.copyright_text || "Footer Links & Text";
         if (activeTab === 'impact') return item.stat;
         return item.name || item.title;
     };
@@ -289,37 +274,18 @@ export default function AdminDashboard() {
         if (activeTab === 'testimonials') return item.role;
         if (activeTab === 'impact') return item.label;
         if (activeTab === 'about') return "Configure Mission, Vision, etc.";
-        if (activeTab === 'contact') return item.email;
+        if (activeTab === 'contact') return item.phone || "Email: " + item.email;
         if (activeTab === 'footer') return item.copyright_text;
-        return item.description?.substring(0, 30) + '...';
+        return item.description?.substring(0, 30) + (item.description?.length > 30 ? '...' : '');
     };
 
     const isSettingsTab = ['about', 'contact', 'footer'].includes(activeTab);
+    const dataEmpty = !getCurrentData() || getCurrentData().length === 0;
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-            {/* Notifications */}
-            <div className="fixed top-20 right-4 z-[110] space-y-2 max-w-sm">
-                {error && (
-                    <div className="bg-red-50 border-l-4 border-red-500 p-4 shadow-lg rounded-r animate-in slide-in-from-right duration-300">
-                        <div className="flex items-center">
-                            <AlertCircle className="text-red-500 mr-2" size={20} />
-                            <p className="text-sm text-red-700">{error}</p>
-                        </div>
-                    </div>
-                )}
-                {success && (
-                    <div className="bg-green-50 border-l-4 border-green-500 p-4 shadow-lg rounded-r animate-in slide-in-from-right duration-300">
-                        <div className="flex items-center">
-                            <CheckCircle className="text-green-500 mr-2" size={20} />
-                            <p className="text-sm text-green-700">{success}</p>
-                        </div>
-                    </div>
-                )}
-            </div>
-
             {/* Mobile Header */}
-            <div className="md:hidden bg-green-900 p-4 flex justify-between items-center text-white sticky top-0 z-50">
+            <div className="md:hidden bg-green-900 p-4 flex justify-between items-center text-white sticky top-0 z-50 shadow-lg">
                 <span className="font-bold">Admin Panel</span>
                 <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
                     {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
@@ -332,7 +298,7 @@ export default function AdminDashboard() {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <h2 className="hidden md:block text-xl font-bold mb-8">Admin Panel</h2>
-                <nav className="flex-1 space-y-1 overflow-y-auto pr-2 scrollbar-hide mt-12 md:mt-0 font-medium">
+                <nav className="flex-1 space-y-1 overflow-y-auto pr-2 scrollbar-hide mt-1 flow-root md:mt-0 font-medium">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -358,7 +324,7 @@ export default function AdminDashboard() {
                     <h1 className="text-2xl font-bold capitalize text-gray-800">
                         {tabs.find(t => t.id === activeTab)?.label} Management
                     </h1>
-                    {!isSettingsTab && activeTab !== 'donors' && (
+                    {((!isSettingsTab && activeTab !== 'donors') || (isSettingsTab && dataEmpty)) && (
                         <button
                             onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
                             className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-lg flex items-center justify-center hover:bg-green-700 transition-all shadow-md active:scale-95 font-semibold"
@@ -449,7 +415,7 @@ export default function AdminDashboard() {
                             ))}
                         </div>
 
-                        {(!getCurrentData() || getCurrentData().length === 0) && (
+                        {dataEmpty && (
                             <div className="text-center py-24 text-gray-300">
                                 <ImageIcon size={64} className="mx-auto mb-4 opacity-10" />
                                 <p className="text-lg">No items found for this section.</p>
@@ -460,7 +426,7 @@ export default function AdminDashboard() {
                 )}
             </div>
 
-            {/* Confirmation Modal */}
+            {/* Confirmation Modal (Delete only) */}
             <ConfirmationModal
                 isOpen={confirmConfig.isOpen}
                 title={confirmConfig.title}

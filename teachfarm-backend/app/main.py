@@ -3,14 +3,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database.database import engine, Base
 from app.api.routers import public_api, auth, admin_crud
 
+# Create tables on startup
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title="TeachFarm API")
+
+# Refined CORS configuration
+origins = [
+    "http://localhost:3000",
+    "https://teachersfarm.vercel.app",
+    "https://teachers-farm.vercel.app",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Adjust for production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(auth.router, prefix="/api")

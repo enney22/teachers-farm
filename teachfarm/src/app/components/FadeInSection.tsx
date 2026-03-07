@@ -6,9 +6,10 @@ import { motion, useAnimation, useInView } from 'framer-motion';
 
 interface FadeInSectionProps {
   children: ReactNode;
+  className?: string;
 }
 
-export default function FadeInSection({ children }: FadeInSectionProps) {
+export default function FadeInSection({ children, className }: FadeInSectionProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
   const controls = useAnimation();
@@ -22,6 +23,7 @@ export default function FadeInSection({ children }: FadeInSectionProps) {
   return (
     <motion.div
       ref={ref}
+      className={className}
       initial="hidden"
       animate={controls}
       variants={{

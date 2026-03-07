@@ -48,14 +48,12 @@ export default function Services() {
     <section className="bg-gray-100 py-20">
       <div className="container mx-auto px-4 text-black">
         <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
-        <div className={`grid gap-8 justify-center ${services.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
-            services.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
-              'md:grid-cols-3'
+        <div className={`flex overflow-x-auto pb-8 gap-8 scrollbar-hide ${services.length <= 2 ? 'justify-center' : 'justify-start lg:grid lg:grid-cols-3 lg:overflow-visible'
           }`}>
           {services.map((service) => {
             const IconComponent = iconMap[service.icon || 'Star'] || Star;
             return (
-              <FadeInSection key={service.id}>
+              <FadeInSection key={service.id} className="min-w-[300px] flex-shrink-0">
                 <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 h-full border-b-4 border-transparent hover:border-green-600">
                   <div className="h-12 w-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors">
                     <IconComponent size={24} />
