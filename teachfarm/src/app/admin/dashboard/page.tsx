@@ -30,7 +30,7 @@ import { ConfirmationModal } from './ConfirmationModal';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-type TabType = 'team' | 'programs' | 'payment-settings' | 'donors' | 'activities' | 'services' | 'testimonials' | 'pillars' | 'hero' | 'about' | 'contact' | 'footer' | 'impact';
+type TabType = 'team' | 'programs' | 'activities' | 'impact' | 'hero' | 'services' | 'testimonials' | 'pillars' | 'messages' | 'about' | 'contact' | 'footer' | 'payment-settings' | 'donors';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<TabType>('team');
@@ -98,6 +98,7 @@ export default function AdminDashboard() {
     const { data: contactSettings, isLoading: loadingContact } = createQuery('admin-contact', 'contact-settings', true);
     const { data: footerSettings, isLoading: loadingFooter } = createQuery('admin-footer', 'footer-settings', true);
     const { data: impactStats, isLoading: loadingImpact } = createQuery('admin-impact', 'impact-stats', true);
+    const { data: contactMessages, isLoading: loadingMessages } = createQuery('admin-messages', 'contact-messages', true);
 
     // Mutations
     const mutationOptions = (key: string) => ({
@@ -203,7 +204,8 @@ export default function AdminDashboard() {
             about: aboutMutation,
             contact: contactMutation,
             footer: footerMutation,
-            impact: impactMutation
+            impact: impactMutation,
+            messages: null as any
         };
 
         // No confirmation modal for Create/Update, just Save
@@ -228,11 +230,12 @@ export default function AdminDashboard() {
         { id: 'team', label: 'Team', icon: <Info size={18} /> },
         { id: 'programs', label: 'Programs', icon: <GraduationCap size={18} /> },
         { id: 'activities', label: 'Activities', icon: <ImageIcon size={18} /> },
+        { id: 'testimonials', label: 'Testimonials', icon: <MessageSquare size={18} /> },
+        { id: 'pillars', label: 'Core Pillars', icon: <Layout size={18} /> },
         { id: 'impact', label: 'Impact Stats', icon: <TrendingUp size={18} /> },
         { id: 'hero', label: 'Hero Slides', icon: <ImageIcon size={18} /> },
         { id: 'services', label: 'Services', icon: <Settings size={18} /> },
-        { id: 'testimonials', label: 'Testimonials', icon: <MessageSquare size={18} /> },
-        { id: 'pillars', label: 'Core Pillars', icon: <Layout size={18} /> },
+        { id: 'messages', label: 'Contact Messages', icon: <MessageSquare size={18} /> },
         { id: 'about', label: 'About Page', icon: <Info size={18} /> },
         { id: 'contact', label: 'Contact Info', icon: <Phone size={18} /> },
         { id: 'footer', label: 'Footer Settings', icon: <Settings size={18} /> },
@@ -254,7 +257,8 @@ export default function AdminDashboard() {
             about: aboutSettings ? [aboutSettings] : [],
             contact: contactSettings ? [contactSettings] : [],
             footer: footerSettings ? [footerSettings] : [],
-            impact: impactStats
+            impact: impactStats,
+            messages: contactMessages
         };
         return dataMap[activeTab];
     };
@@ -266,10 +270,12 @@ export default function AdminDashboard() {
         if (activeTab === 'contact') return item.email || "Contact Details";
         if (activeTab === 'footer') return item.copyright_text || "Footer Links & Text";
         if (activeTab === 'impact') return item.stat;
+        if (activeTab === 'messages') return item.name;
         return item.name || item.title;
     };
 
     const getDetails = (item: any) => {
+        if (activeTab === 'messages') return item.message;
         if (activeTab === 'team') return item.role;
         if (activeTab === 'payment-settings') return item.currency;
         if (activeTab === 'donors') return `USD ${item.donorsamount}`;
@@ -300,7 +306,7 @@ export default function AdminDashboard() {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <h2 className="hidden md:block text-xl font-bold mb-8">Admin Panel</h2>
-                <nav className="flex-1 space-y-1 overflow-y-auto pr-2 scrollbar-hide mt-1 flow-root md:mt-0 font-medium">
+                <nav className="flex-1 space-y-1 overflow-y-auto pr-2 mt-1 flow-root md:mt-0 font-medium">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -326,7 +332,7 @@ export default function AdminDashboard() {
                     <h1 className="text-2xl font-bold capitalize text-gray-800">
                         {tabs.find(t => t.id === activeTab)?.label} Management
                     </h1>
-                    {((!isSettingsTab && activeTab !== 'donors') || (isSettingsTab && dataEmpty)) && (
+                    {((!isSettingsTab && activeTab !== 'donors' && activeTab !== 'messages') || (isSettingsTab && dataEmpty)) && (
                         <button
                             onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
                             className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-lg flex items-center justify-center hover:bg-green-700 transition-all shadow-md active:scale-95 font-semibold"
@@ -357,7 +363,9 @@ export default function AdminDashboard() {
                                 <tbody className="bg-white divide-y divide-gray-100">
                                     {getCurrentData()?.map((item: any) => (
                                         <tr key={item.id} className="hover:bg-green-50/30 transition-colors group">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 font-mono">{item.id || '-'}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 font-mono">
+                                                {isSettingsTab ? 'SYSTEM' : (item.id || '-')}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 group-hover:text-green-700 transition-colors">{getLabel(item)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {getDetails(item)}
