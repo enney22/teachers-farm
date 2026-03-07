@@ -49,16 +49,33 @@ def read_hero_slides(db: Session = Depends(get_db)):
 
 @router.get("/about-settings", response_model=schemas.AboutSettings)
 def read_about_settings(db: Session = Depends(get_db)):
-    return db.query(models.AboutSettings).first()
+    settings = db.query(models.AboutSettings).first()
+    if not settings:
+        return models.AboutSettings(id=0, mission_text="", vision_text="", goal_text="", commitment_text="")
+    return settings
 
 @router.get("/contact-settings", response_model=schemas.ContactSettings)
 def read_contact_settings(db: Session = Depends(get_db)):
-    return db.query(models.ContactSettings).first()
+    settings = db.query(models.ContactSettings).first()
+    if not settings:
+        return models.ContactSettings(id=0, email="info@teachfarm.org", phone="+231-xxx-xxx", address="Monrovia, Liberia")
+    return settings
 
 @router.get("/footer-settings", response_model=schemas.FooterSettings)
 def read_footer_settings(db: Session = Depends(get_db)):
-    return db.query(models.FooterSettings).first()
+    settings = db.query(models.FooterSettings).first()
+    if not settings:
+        return models.FooterSettings(id=0, copyright_text="Teacher's Farm. All rights reserved.")
+    return settings
 
 @router.get("/impact-stats", response_model=List[schemas.ImpactStat])
 def read_impact_stats(db: Session = Depends(get_db)):
     return db.query(models.ImpactStat).all()
+
+@router.post("/contact-messages", response_model=schemas.ContactMessage)
+def create_contact_message(message: schemas.ContactMessageCreate, db: Session = Depends(get_db)):
+    db_message = models.ContactMessage(**message.dict())
+    db.add(db_message)
+    db.commit()
+    db.refresh(db_message)
+    return db_message

@@ -350,6 +350,24 @@ def upsert_footer_settings(settings: schemas.FooterSettingsCreate, db: Session =
     db.refresh(db_settings)
     return db_settings
 
+# PUT aliases for singleton settings to prevent 404s from CRUD patterns
+@router.put("/about-settings/{id}", response_model=schemas.AboutSettings)
+def update_about_settings_alias(id: int, settings: schemas.AboutSettingsCreate, db: Session = Depends(get_db)):
+    return upsert_about_settings(settings, db)
+
+@router.put("/contact-settings/{id}", response_model=schemas.ContactSettings)
+def update_contact_settings_alias(id: int, settings: schemas.ContactSettingsCreate, db: Session = Depends(get_db)):
+    return upsert_contact_settings(settings, db)
+
+@router.put("/footer-settings/{id}", response_model=schemas.FooterSettings)
+def update_footer_settings_alias(id: int, settings: schemas.FooterSettingsCreate, db: Session = Depends(get_db)):
+    return upsert_footer_settings(settings, db)
+
+# Contact Messages
+@router.get("/contact-messages", response_model=List[schemas.ContactMessage])
+def read_contact_messages(db: Session = Depends(get_db)):
+    return db.query(models.ContactMessage).order_by(models.ContactMessage.created_at.desc()).all()
+
 # Impact Stats CRUD
 @router.get("/impact-stats", response_model=List[schemas.ImpactStat])
 def read_impact_stats(db: Session = Depends(get_db)):

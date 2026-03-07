@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Text, Enum, JSON
+from sqlalchemy import Column, Integer, String, Text, Enum, JSON, DateTime
 from app.database.database import Base
 import enum
+from datetime import datetime
 
 class CurrencyEnum(str, enum.Enum):
     LRD = "LRD"
@@ -122,3 +123,11 @@ class ImpactStat(Base):
     stat = Column(String) # e.g. "700+"
     label = Column(String) # e.g. "Teachers Trained"
     icon = Column(String, default="Star") # Lucide icon name
+
+class ContactMessage(Base):
+    __tablename__ = "contact_messages"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    email = Column(String)
+    message = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
