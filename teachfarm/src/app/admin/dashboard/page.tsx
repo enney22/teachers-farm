@@ -115,7 +115,9 @@ export default function AdminDashboard() {
 
     const createMutation = (key: string, path: string) => useMutation({
         mutationFn: (data: any) => {
-            if (editingItem && editingItem.id) {
+            // For settings, id: 0 is a placeholder for 'not yet in DB' or 'has default but need to update'
+            // We want to use PUT if we have a real ID (> 0) or if we want to hit the alias
+            if (editingItem && (editingItem.id > 0 || (isSettingsTab && editingItem.id !== undefined))) {
                 return axios.put(`${API_BASE_URL}/admin/${path}/${editingItem.id}`, data, { headers: getHeaders() });
             }
             return axios.post(`${API_BASE_URL}/admin/${path}`, data, { headers: getHeaders() });
