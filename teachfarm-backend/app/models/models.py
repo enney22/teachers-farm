@@ -74,3 +74,51 @@ class CorePillar(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     description = Column(Text)
+
+class HeroSlide(Base):
+    __tablename__ = "hero_slides"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    subtitle = Column(Text)
+    image_url = Column(String)
+    button_text = Column(String, default="Learn More")
+    button_link = Column(String, default="/about")
+    order = Column(Integer, default=0)
+
+class AboutSettings(Base):
+    __tablename__ = "about_settings"
+    id = Column(Integer, primary_key=True, index=True)
+    mission_title = Column(String, default="Our Mission")
+    mission_text = Column(Text)
+    vision_title = Column(String, default="Our Vision")
+    vision_text = Column(Text)
+    goal_title = Column(String, default="Our Goal")
+    goal_text = Column(Text)
+    commitment_title = Column(String, default="Our Commitment")
+    commitment_text = Column(Text)
+    image_url = Column(String, nullable=True)
+
+class ContactSettings(Base):
+    __tablename__ = "contact_settings"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String)
+    phone = Column(String)
+    address = Column(String)
+    map_url = Column(String, nullable=True)
+
+class FooterSettings(Base):
+    __tablename__ = "footer_settings"
+    id = Column(Integer, primary_key=True, index=True)
+    facebook_url = Column(String, nullable=True)
+    instagram_url = Column(String, nullable=True)
+    linkedin_url = Column(String, nullable=True)
+    whatsapp_url = Column(String, nullable=True)
+    twitter_url = Column(String, nullable=True)
+    copyright_text = Column(String, default="Teacher's Farm. All rights reserved.")
+
+class ImpactStat(Base):
+    __tablename__ = "impact_stats"
+    id = Column(Integer, primary_key=True, index=True)
+    stat = Column(String) # e.g. "700+"
+    label = Column(String) # e.g. "Teachers Trained"
+    icon = Column(String, default="Star") # Lucide icon name

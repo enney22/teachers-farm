@@ -140,3 +140,86 @@ class CorePillar(CorePillarBase):
     id: int
     class Config:
         from_attributes = True
+
+# Hero Slide Schemas
+class HeroSlideBase(BaseModel):
+    title: str
+    subtitle: str
+    image_url: str
+    button_text: str = "Learn More"
+    button_link: str = "/about"
+    order: int = 0
+
+class HeroSlideCreate(HeroSlideBase):
+    pass
+
+class HeroSlide(HeroSlideBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+# About Settings Schemas
+class AboutSettingsBase(BaseModel):
+    mission_title: str = "Our Mission"
+    mission_text: str
+    vision_title: str = "Our Vision"
+    vision_text: str
+    goal_title: str = "Our Goal"
+    goal_text: str
+    commitment_title: str = "Our Commitment"
+    commitment_text: str
+    image_url: Optional[str] = None
+
+class AboutSettingsCreate(AboutSettingsBase):
+    pass
+
+class AboutSettings(AboutSettingsBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+# Contact Settings Schemas
+class ContactSettingsBase(BaseModel):
+    email: str
+    phone: str
+    address: str
+    map_url: Optional[str] = None
+
+class ContactSettingsCreate(ContactSettingsBase):
+    pass
+
+class ContactSettings(ContactSettingsBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+# Footer Settings Schemas
+class FooterSettingsBase(BaseModel):
+    facebook_url: Optional[str] = None
+    instagram_url: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    whatsapp_url: Optional[str] = None
+    twitter_url: Optional[str] = None
+    copyright_text: str = "Teacher's Farm. All rights reserved."
+
+class FooterSettingsCreate(FooterSettingsBase):
+    pass
+
+class FooterSettings(FooterSettingsBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+# Impact Stat Schemas
+class ImpactStatBase(BaseModel):
+    stat: str
+    label: str
+    icon: str = "Star"
+
+class ImpactStatCreate(ImpactStatBase):
+    pass
+
+class ImpactStat(ImpactStatBase):
+    id: int
+    class Config:
+        from_attributes = True

@@ -234,3 +234,151 @@ def delete_donor_info(donor_id: int, db: Session = Depends(get_db)):
     db.delete(db_donor)
     db.commit()
     return {"message": "Donor record deleted successfully"}
+
+# Hero Slides CRUD
+@router.get("/hero-slides", response_model=List[schemas.HeroSlide])
+def read_hero_slides(db: Session = Depends(get_db)):
+    return db.query(models.HeroSlide).order_by(models.HeroSlide.order).all()
+
+@router.post("/hero-slides", response_model=schemas.HeroSlide)
+def create_hero_slide(slide: schemas.HeroSlideCreate, db: Session = Depends(get_db)):
+    db_slide = models.HeroSlide(**slide.dict())
+    db.add(db_slide)
+    db.commit()
+    db.refresh(db_slide)
+    return db_slide
+
+@router.put("/hero-slides/{slide_id}", response_model=schemas.HeroSlide)
+def update_hero_slide(slide_id: int, slide: schemas.HeroSlideCreate, db: Session = Depends(get_db)):
+    db_slide = db.query(models.HeroSlide).filter(models.HeroSlide.id == slide_id).first()
+    if not db_slide:
+        raise HTTPException(status_code=404, detail="Slide not found")
+    for key, value in slide.dict().items():
+        setattr(db_slide, key, value)
+    db.commit()
+    db.refresh(db_slide)
+    return db_slide
+
+@router.delete("/hero-slides/{slide_id}")
+def delete_hero_slide(slide_id: int, db: Session = Depends(get_db)):
+    db_slide = db.query(models.HeroSlide).filter(models.HeroSlide.id == slide_id).first()
+    if not db_slide:
+        raise HTTPException(status_code=404, detail="Slide not found")
+    db.delete(db_slide)
+    db.commit()
+    return {"message": "Slide deleted successfully"}
+
+# About Settings (Upsert)
+@router.get("/about-settings", response_model=schemas.AboutSettings)
+def read_about_settings(db: Session = Depends(get_db)):
+    settings = db.query(models.AboutSettings).first()
+    if not settings:
+        # Create default if none exists
+        settings = models.AboutSettings(
+            mission_text="Our mission is to empower teachers.",
+            vision_text="Our vision is excellent education.",
+            goal_text="Our goal is high-performing schools.",
+            commitment_text="We are committed to Liberia's future."
+        )
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+    return settings
+
+@router.post("/about-settings", response_model=schemas.AboutSettings)
+def upsert_about_settings(settings: schemas.AboutSettingsCreate, db: Session = Depends(get_db)):
+    db_settings = db.query(models.AboutSettings).first()
+    if not db_settings:
+        db_settings = models.AboutSettings(**settings.dict())
+        db.add(db_settings)
+    else:
+        for key, value in settings.dict().items():
+            setattr(db_settings, key, value)
+    db.commit()
+    db.refresh(db_settings)
+    return db_settings
+
+# Contact Settings (Upsert)
+@router.get("/contact-settings", response_model=schemas.ContactSettings)
+def read_contact_settings(db: Session = Depends(get_db)):
+    settings = db.query(models.ContactSettings).first()
+    if not settings:
+        settings = models.ContactSettings(
+            email="info@teachfarm.org",
+            phone="+231-xxx-xxx",
+            address="Monrovia, Liberia"
+        )
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+    return settings
+
+@router.post("/contact-settings", response_model=schemas.ContactSettings)
+def upsert_contact_settings(settings: schemas.ContactSettingsCreate, db: Session = Depends(get_db)):
+    db_settings = db.query(models.ContactSettings).first()
+    if not db_settings:
+        db_settings = models.ContactSettings(**settings.dict())
+        db.add(db_settings)
+    else:
+        for key, value in settings.dict().items():
+            setattr(db_settings, key, value)
+    db.commit()
+    db.refresh(db_settings)
+    return db_settings
+
+# Footer Settings (Upsert)
+@router.get("/footer-settings", response_model=schemas.FooterSettings)
+def read_footer_settings(db: Session = Depends(get_db)):
+    settings = db.query(models.FooterSettings).first()
+    if not settings:
+        settings = models.FooterSettings()
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+    return settings
+
+@router.post("/footer-settings", response_model=schemas.FooterSettings)
+def upsert_footer_settings(settings: schemas.FooterSettingsCreate, db: Session = Depends(get_db)):
+    db_settings = db.query(models.FooterSettings).first()
+    if not db_settings:
+        db_settings = models.FooterSettings(**settings.dict())
+        db.add(db_settings)
+    else:
+        for key, value in settings.dict().items():
+            setattr(db_settings, key, value)
+    db.commit()
+    db.refresh(db_settings)
+    return db_settings
+
+# Impact Stats CRUD
+@router.get("/impact-stats", response_model=List[schemas.ImpactStat])
+def read_impact_stats(db: Session = Depends(get_db)):
+    return db.query(models.ImpactStat).all()
+
+@router.post("/impact-stats", response_model=schemas.ImpactStat)
+def create_impact_stat(stat: schemas.ImpactStatCreate, db: Session = Depends(get_db)):
+    db_stat = models.ImpactStat(**stat.dict())
+    db.add(db_stat)
+    db.commit()
+    db.refresh(db_stat)
+    return db_stat
+
+@router.put("/impact-stats/{stat_id}", response_model=schemas.ImpactStat)
+def update_impact_stat(stat_id: int, stat: schemas.ImpactStatCreate, db: Session = Depends(get_db)):
+    db_stat = db.query(models.ImpactStat).filter(models.ImpactStat.id == stat_id).first()
+    if not db_stat:
+        raise HTTPException(status_code=404, detail="Stat not found")
+    for key, value in stat.dict().items():
+        setattr(db_stat, key, value)
+    db.commit()
+    db.refresh(db_stat)
+    return db_stat
+
+@router.delete("/impact-stats/{stat_id}")
+def delete_impact_stat(stat_id: int, db: Session = Depends(get_db)):
+    db_stat = db.query(models.ImpactStat).filter(models.ImpactStat.id == stat_id).first()
+    if not db_stat:
+        raise HTTPException(status_code=404, detail="Stat not found")
+    db.delete(db_stat)
+    db.commit()
+    return {"message": "Stat deleted successfully"}

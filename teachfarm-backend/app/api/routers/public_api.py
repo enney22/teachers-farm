@@ -42,3 +42,23 @@ def read_testimonials(db: Session = Depends(get_db)):
 @router.get("/core-pillars", response_model=List[schemas.CorePillar])
 def read_core_pillars(db: Session = Depends(get_db)):
     return db.query(models.CorePillar).all()
+
+@router.get("/hero-slides", response_model=List[schemas.HeroSlide])
+def read_hero_slides(db: Session = Depends(get_db)):
+    return db.query(models.HeroSlide).order_by(models.HeroSlide.order).all()
+
+@router.get("/about-settings", response_model=schemas.AboutSettings)
+def read_about_settings(db: Session = Depends(get_db)):
+    return db.query(models.AboutSettings).first()
+
+@router.get("/contact-settings", response_model=schemas.ContactSettings)
+def read_contact_settings(db: Session = Depends(get_db)):
+    return db.query(models.ContactSettings).first()
+
+@router.get("/footer-settings", response_model=schemas.FooterSettings)
+def read_footer_settings(db: Session = Depends(get_db)):
+    return db.query(models.FooterSettings).first()
+
+@router.get("/impact-stats", response_model=List[schemas.ImpactStat])
+def read_impact_stats(db: Session = Depends(get_db)):
+    return db.query(models.ImpactStat).all()
