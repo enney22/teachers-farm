@@ -6,6 +6,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -87,12 +88,16 @@ export default function HeroSection() {
           className="absolute inset-0"
         >
           {/* Background Image with Overlay */}
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] scale-110"
-            style={{
-              backgroundImage: `url(${slide.image_url.startsWith('http') ? slide.image_url : `${API_BASE_URL.replace('/api', '')}${slide.image_url}`})`,
-            }}
-          />
+          <div className="absolute inset-0 transition-transform duration-[10000ms] scale-110">
+            <Image
+              src={slide.image_url.startsWith('http') ? slide.image_url : `${API_BASE_URL.replace('/api', '')}${slide.image_url}`}
+              alt={slide.title}
+              fill
+              className="object-cover"
+              priority={currentSlide === 0}
+              sizes="100vw"
+            />
+          </div>
           <div className="absolute inset-0 bg-black/50" />
 
           {/* Content */}

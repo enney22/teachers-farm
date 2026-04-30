@@ -34,11 +34,11 @@ export default function Footer() {
     <footer className="bg-green-950 text-white py-12">
       <div className="container mx-auto px-4 text-center">
         <div className="flex justify-center space-x-6 mb-8">
-          {settings?.facebook_url && <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors"><FaFacebookF size={24} /></a>}
-          {settings?.instagram_url && <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors"><FaInstagram size={24} /></a>}
-          {settings?.linkedin_url && <a href={settings.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors"><FaLinkedinIn size={24} /></a>}
-          {settings?.whatsapp_url && <a href={settings.whatsapp_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors"><FaWhatsapp size={24} /></a>}
-          {settings?.twitter_url && <a href={settings.twitter_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors"><FaXTwitter size={24} /></a>}
+          {settings?.facebook_url && <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors" aria-label="Facebook"><FaFacebookF size={24} /></a>}
+          {settings?.instagram_url && <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors" aria-label="Instagram"><FaInstagram size={24} /></a>}
+          {settings?.linkedin_url && <a href={settings.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors" aria-label="LinkedIn"><FaLinkedinIn size={24} /></a>}
+          {settings?.whatsapp_url && <a href={settings.whatsapp_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors" aria-label="WhatsApp"><FaWhatsapp size={24} /></a>}
+          {settings?.twitter_url && <a href={settings.twitter_url} target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition-colors" aria-label="X (Twitter)"><FaXTwitter size={24} /></a>}
         </div>
         <div className="border-t border-green-900 pt-8 mt-8">
           <p className="text-green-100 opacity-80 text-sm">
