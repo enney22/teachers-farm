@@ -13,6 +13,8 @@ origins = [
     "http://localhost:3000",
     "https://teachersfarm.vercel.app",
     "https://teachers-farm.vercel.app",
+    "https://teachersfarm.com",
+    "https://www.teachersfarm.com",
 ]
 
 app.add_middleware(
