@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/teachers_farm_og_image.png', // Ensure this is moved to public
+        url: '/teachers_farm_og_image.png',
         width: 1200,
         height: 630,
         alt: "Teacher's Farm Professional Education Hub",
@@ -113,13 +113,13 @@ export default function RootLayout({
 
         {/* Apple Touch Icon */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.ico" sizes="180x180" />
-        
+
         <Script
           id="json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        
+
         {/* Google Analytics GA4 */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-KLX1XTXXZM"
