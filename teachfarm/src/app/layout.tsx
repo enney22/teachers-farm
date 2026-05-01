@@ -16,7 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://teachersfarm.vercel.app'), // Update to your custom domain once live
+  metadataBase: new URL('https://www.teachersfarm.com'),
   title: {
     default: "Teacher's Farm | Empowering Educators for Liberia's Future",
     template: "%s | Teacher's Farm"
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Teacher's Farm | Cultivating Excellence in Education",
     description: "Developing 700 high-performing teachers in Liberia. Join our mission to transform education.",
-    url: 'https://teachersfarm.vercel.app',
+    url: 'https://www.teachersfarm.com',
     siteName: "Teacher's Farm",
     locale: 'en_US',
     type: 'website',
@@ -68,9 +68,34 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    google: 'Vm4smWOqFvo6tT5KmKhnBijH4hst4ilhLdvqH3uNOXo',
+  },
 };
 
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
+import Script from "next/script";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "Teacher's Farm",
+  "url": "https://www.teachersfarm.com",
+  "logo": "https://www.teachersfarm.com/logo.png",
+  "description": "Teacher's Farm is a premier hub developing high-performing teachers in Liberia through training, support, and sustainable resources.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "LR",
+    "addressLocality": "Monrovia"
+  },
+  "sameAs": [
+    "https://www.facebook.com/share/1C5M236gW2/",
+    "https://www.instagram.com/teachers_farmedu?igsh=MXdqbWNldDRxa2tsYg==",
+    "https://www.linkedin.com/posts/teacher-s-farm_teachersfarm-wethink-plant-activity-7427362995917197312-4cdv?utm_source=share&utm_medium=member_android&rcm=ACoAACM8hUgBB2oBflcL6yhibpG6zcraSWj8TZQ",
+    "https://whatsapp.com/channel/0029VakNREI0QeanSK9CvT42",
+    "https://www.instagram.com/teachersfarm"
+  ]
+};
 
 export default function RootLayout({
   children,
@@ -88,6 +113,12 @@ export default function RootLayout({
 
         {/* Apple Touch Icon */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.ico" sizes="180x180" />
+        
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
