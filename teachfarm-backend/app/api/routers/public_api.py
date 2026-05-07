@@ -79,3 +79,22 @@ def create_contact_message(message: schemas.ContactMessageCreate, db: Session = 
     db.commit()
     db.refresh(db_message)
     return db_message
+
+@router.get("/partners", response_model=List[schemas.Partner])
+def read_partners(db: Session = Depends(get_db)):
+    return db.query(models.Partner).order_by(models.Partner.order).all()
+
+@router.get("/blog", response_model=List[schemas.BlogPost])
+def read_blog_posts(db: Session = Depends(get_db)):
+    return db.query(models.BlogPost).order_by(models.BlogPost.created_at.desc()).all()
+
+@router.get("/blog/{slug}", response_model=schemas.BlogPost)
+def read_blog_post(slug: str, db: Session = Depends(get_db)):
+    post = db.query(models.BlogPost).filter(models.BlogPost.slug == slug).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Blog post not found")
+    return post
+
+@router.get("/blog-featured", response_model=List[schemas.BlogPost])
+def read_featured_blog_posts(db: Session = Depends(get_db)):
+    return db.query(models.BlogPost).filter(models.BlogPost.is_featured == 1).order_by(models.BlogPost.created_at.desc()).all()

@@ -400,3 +400,69 @@ def delete_impact_stat(stat_id: int, db: Session = Depends(get_db)):
     db.delete(db_stat)
     db.commit()
     return {"message": "Stat deleted successfully"}
+
+# Partners CRUD
+@router.get("/partners", response_model=List[schemas.Partner])
+def read_partners(db: Session = Depends(get_db)):
+    return db.query(models.Partner).order_by(models.Partner.order).all()
+
+@router.post("/partners", response_model=schemas.Partner)
+def create_partner(partner: schemas.PartnerCreate, db: Session = Depends(get_db)):
+    db_partner = models.Partner(**partner.dict())
+    db.add(db_partner)
+    db.commit()
+    db.refresh(db_partner)
+    return db_partner
+
+@router.put("/partners/{partner_id}", response_model=schemas.Partner)
+def update_partner(partner_id: int, partner: schemas.PartnerCreate, db: Session = Depends(get_db)):
+    db_partner = db.query(models.Partner).filter(models.Partner.id == partner_id).first()
+    if not db_partner:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    for key, value in partner.dict().items():
+        setattr(db_partner, key, value)
+    db.commit()
+    db.refresh(db_partner)
+    return db_partner
+
+@router.delete("/partners/{partner_id}")
+def delete_partner(partner_id: int, db: Session = Depends(get_db)):
+    db_partner = db.query(models.Partner).filter(models.Partner.id == partner_id).first()
+    if not db_partner:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    db.delete(db_partner)
+    db.commit()
+    return {"message": "Partner deleted successfully"}
+
+# Blog Posts CRUD
+@router.get("/blog", response_model=List[schemas.BlogPost])
+def read_blog_posts(db: Session = Depends(get_db)):
+    return db.query(models.BlogPost).order_by(models.BlogPost.created_at.desc()).all()
+
+@router.post("/blog", response_model=schemas.BlogPost)
+def create_blog_post(post: schemas.BlogPostCreate, db: Session = Depends(get_db)):
+    db_post = models.BlogPost(**post.dict())
+    db.add(db_post)
+    db.commit()
+    db.refresh(db_post)
+    return db_post
+
+@router.put("/blog/{post_id}", response_model=schemas.BlogPost)
+def update_blog_post(post_id: int, post: schemas.BlogPostCreate, db: Session = Depends(get_db)):
+    db_post = db.query(models.BlogPost).filter(models.BlogPost.id == post_id).first()
+    if not db_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    for key, value in post.dict().items():
+        setattr(db_post, key, value)
+    db.commit()
+    db.refresh(db_post)
+    return db_post
+
+@router.delete("/blog/{post_id}")
+def delete_blog_post(post_id: int, db: Session = Depends(get_db)):
+    db_post = db.query(models.BlogPost).filter(models.BlogPost.id == post_id).first()
+    if not db_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    db.delete(db_post)
+    db.commit()
+    return {"message": "Post deleted successfully"}

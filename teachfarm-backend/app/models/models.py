@@ -131,3 +131,23 @@ class ContactMessage(Base):
     email = Column(String)
     message = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class Partner(Base):
+    __tablename__ = "partners"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    logo_url = Column(String)
+    website_url = Column(String, nullable=True)
+    order = Column(Integer, default=0)
+
+class BlogPost(Base):
+    __tablename__ = "blog_posts"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    slug = Column(String, unique=True, index=True)
+    excerpt = Column(Text)
+    content = Column(Text)
+    featured_image = Column(String, nullable=True)
+    author = Column(String, default="Teacher's Farm Team")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_featured = Column(Integer, default=0) # 1 for featured, 0 for normal

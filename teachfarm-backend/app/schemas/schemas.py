@@ -238,3 +238,37 @@ class ContactMessage(ContactMessageBase):
     created_at: datetime
     class Config:
         from_attributes = True
+
+# Partner Schemas
+class PartnerBase(BaseModel):
+    name: str
+    logo_url: str
+    website_url: Optional[str] = None
+    order: int = 0
+
+class PartnerCreate(PartnerBase):
+    pass
+
+class Partner(PartnerBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+# Blog Post Schemas
+class BlogPostBase(BaseModel):
+    title: str
+    slug: str
+    excerpt: str
+    content: str
+    featured_image: Optional[str] = None
+    author: str = "Teacher's Farm Team"
+    is_featured: int = 0
+
+class BlogPostCreate(BlogPostBase):
+    pass
+
+class BlogPost(BlogPostBase):
+    id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
