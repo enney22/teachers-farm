@@ -71,6 +71,9 @@ export const metadata: Metadata = {
   verification: {
     google: 'google56c96dae71c12d0e',
   },
+  alternates: {
+    canonical: '/',
+  },
 };
 
 import ReactQueryProvider from "@/providers/ReactQueryProvider";

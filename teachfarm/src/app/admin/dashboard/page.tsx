@@ -26,11 +26,13 @@ import { AboutModal } from './AboutModal';
 import { ContactModal } from './ContactModal';
 import { FooterModal } from './FooterModal';
 import { ImpactModal } from './ImpactModal';
+import { PartnerModal } from './PartnerModal';
+import { BlogModal } from './BlogModal';
 import { ConfirmationModal } from './ConfirmationModal';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-type TabType = 'team' | 'programs' | 'activities' | 'impact' | 'hero' | 'services' | 'testimonials' | 'pillars' | 'messages' | 'about' | 'contact' | 'footer' | 'payment-settings' | 'donors';
+type TabType = 'team' | 'programs' | 'activities' | 'impact' | 'hero' | 'services' | 'testimonials' | 'pillars' | 'messages' | 'about' | 'contact' | 'footer' | 'payment-settings' | 'donors' | 'partners' | 'blog';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<TabType>('team');
@@ -99,6 +101,8 @@ export default function AdminDashboard() {
     const { data: footerSettings, isLoading: loadingFooter } = createQuery('admin-footer', 'footer-settings', true);
     const { data: impactStats, isLoading: loadingImpact } = createQuery('admin-impact', 'impact-stats', true);
     const { data: contactMessages, isLoading: loadingMessages } = createQuery('admin-messages', 'contact-messages', true);
+    const { data: partners, isLoading: loadingPartners } = createQuery('admin-partners', 'partners', true);
+    const { data: blogPosts, isLoading: loadingBlog } = createQuery('admin-blog', 'blog', true);
 
     // Mutations
     const mutationOptions = (key: string) => ({
@@ -139,6 +143,8 @@ export default function AdminDashboard() {
     const contactMutation = createMutation('admin-contact', 'contact-settings');
     const footerMutation = createMutation('admin-footer', 'footer-settings');
     const impactMutation = createMutation('admin-impact', 'impact-stats');
+    const partnerMutation = createMutation('admin-partners', 'partners');
+    const blogMutation = createMutation('admin-blog', 'blog');
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => {
@@ -152,7 +158,9 @@ export default function AdminDashboard() {
                 testimonials: 'testimonials',
                 pillars: 'core-pillars',
                 hero: 'hero-slides',
-                impact: 'impact-stats'
+                impact: 'impact-stats',
+                partners: 'partners',
+                blog: 'blog'
             };
             return axios.delete(`${API_BASE_URL}/admin/${endpointMap[activeTab]}/${id}`, { headers: getHeaders() });
         },
@@ -167,7 +175,9 @@ export default function AdminDashboard() {
                 testimonials: 'admin-testimonials',
                 pillars: 'admin-pillars',
                 hero: 'admin-hero',
-                impact: 'admin-impact'
+                impact: 'admin-impact',
+                partners: 'admin-partners',
+                blog: 'admin-blog'
             };
             queryClient.invalidateQueries({ queryKey: [keyMap[activeTab]] });
             toast.success('Item deleted successfully');
@@ -205,6 +215,8 @@ export default function AdminDashboard() {
             contact: contactMutation,
             footer: footerMutation,
             impact: impactMutation,
+            partners: partnerMutation,
+            blog: blogMutation,
             messages: null as any
         };
 
@@ -224,7 +236,7 @@ export default function AdminDashboard() {
     const isLoading = loadingTeam || loadingPrograms || loadingPayment || loadingDonors ||
         loadingActivities || loadingServices || loadingTestimonials ||
         loadingPillars || loadingHero || loadingAbout || loadingContact ||
-        loadingFooter || loadingImpact;
+        loadingFooter || loadingImpact || loadingPartners || loadingBlog;
 
     const tabs: { id: TabType, label: string, icon: any }[] = [
         { id: 'team', label: 'Team', icon: <Info size={18} /> },
@@ -239,6 +251,8 @@ export default function AdminDashboard() {
         { id: 'about', label: 'About Page', icon: <Info size={18} /> },
         { id: 'contact', label: 'Contact Info', icon: <Phone size={18} /> },
         { id: 'footer', label: 'Footer Settings', icon: <Settings size={18} /> },
+        { id: 'partners', label: 'Partners', icon: <Layout size={18} /> },
+        { id: 'blog', label: 'Blog Posts', icon: <MessageSquare size={18} /> },
         { id: 'payment-settings', label: 'Donations', icon: <Settings size={18} /> },
         { id: 'donors', label: 'Donors', icon: <Settings size={18} /> },
     ];
@@ -258,6 +272,8 @@ export default function AdminDashboard() {
             contact: contactSettings ? [contactSettings] : [],
             footer: footerSettings ? [footerSettings] : [],
             impact: impactStats,
+            partners: partners,
+            blog: blogPosts,
             messages: contactMessages
         };
         return dataMap[activeTab];
@@ -271,6 +287,8 @@ export default function AdminDashboard() {
         if (activeTab === 'footer') return item.copyright_text || "Footer Links & Text";
         if (activeTab === 'impact') return item.stat;
         if (activeTab === 'messages') return item.name;
+        if (activeTab === 'partners') return item.name;
+        if (activeTab === 'blog') return item.title;
         return item.name || item.title;
     };
 
@@ -284,6 +302,8 @@ export default function AdminDashboard() {
         if (activeTab === 'about') return "Configure Mission, Vision, etc.";
         if (activeTab === 'contact') return item.phone || "Email: " + item.email;
         if (activeTab === 'footer') return item.copyright_text;
+        if (activeTab === 'partners') return item.website_url || "No website linked";
+        if (activeTab === 'blog') return item.excerpt?.substring(0, 50) + "...";
         return item.description?.substring(0, 30) + (item.description?.length > 30 ? '...' : '');
     };
 
@@ -463,6 +483,8 @@ export default function AdminDashboard() {
                         {activeTab === 'contact' && <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
                         {activeTab === 'footer' && <FooterModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
                         {activeTab === 'impact' && <ImpactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
+                        {activeTab === 'partners' && <PartnerModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
+                        {activeTab === 'blog' && <BlogModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleFormSubmit} initialData={editingItem} />}
                     </>
                 )}
             </div>

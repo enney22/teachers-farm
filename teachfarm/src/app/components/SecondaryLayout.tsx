@@ -16,9 +16,11 @@ import Testimonials from './sections/Testimonials';
 import FadeInSection from './FadeInSection';
 import Card from './ActivitiesCard'
 import ProgramsSection from './ProgramsSection'
+import Partners from './sections/Partners';
+import LatestBlog from './sections/LatestBlog';
 import Image from 'next/image';
 
-export default function SecondaryLayout({ children }: { children: React.ReactNode }) {
+export default function SecondaryLayout({ children, showHomeSections = false }: { children?: React.ReactNode, showHomeSections?: boolean }) {
   const { scrollY, scrollYProgress } = useScroll();
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
@@ -92,51 +94,67 @@ export default function SecondaryLayout({ children }: { children: React.ReactNod
 
       {/* Main content */}
       <Main>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[0] = el; }} aria-label="Hero Section">
-            <HeroSection />
-          </section>
-        </FadeInSection>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[8] = el; }} aria-label="Our Programs">
-            <ProgramsSection />
-          </section>
-        </FadeInSection>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[1] = el; }} aria-label="Core Pillars">
-            <CorePillars />
-          </section>
-        </FadeInSection>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[2] = el; }} aria-label="Services">
-            <Services />
-          </section>
-        </FadeInSection>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[6] = el; }} aria-label="Activities">
-            <Card />
-          </section>
-        </FadeInSection>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[3] = el; }} aria-label="Team Members">
-            <TeamMembers /> {/* Added Team Members section */}
-          </section>
-        </FadeInSection>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[4] = el; }} aria-label="Impact">
-            <Impact /> {/* Added Impact section */}
-          </section>
-        </FadeInSection>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[5] = el; }} aria-label="Testimonials">
-            <Testimonials /> {/* Added Testimonials section */}
-          </section>
-        </FadeInSection>
-        <FadeInSection>
-          <section ref={(el) => { sectionsRef.current[7] = el; }} aria-label="Join Us">
-            <JoinUs />
-          </section>
-        </FadeInSection>
+        {showHomeSections ? (
+          <>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[0] = el; }} aria-label="Hero Section">
+                <HeroSection />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[8] = el; }} aria-label="Our Programs">
+                <ProgramsSection />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[1] = el; }} aria-label="Core Pillars">
+                <CorePillars />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[2] = el; }} aria-label="Services">
+                <Services />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[6] = el; }} aria-label="Activities">
+                <Card />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[3] = el; }} aria-label="Team Members">
+                <TeamMembers />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[4] = el; }} aria-label="Impact">
+                <Impact />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[5] = el; }} aria-label="Testimonials">
+                <Testimonials />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section aria-label="Latest News">
+                <LatestBlog />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section aria-label="Our Partners">
+                <Partners />
+              </section>
+            </FadeInSection>
+            <FadeInSection>
+              <section ref={(el) => { sectionsRef.current[7] = el; }} aria-label="Join Us">
+                <JoinUs />
+              </section>
+            </FadeInSection>
+          </>
+        ) : (
+          children
+        )}
       </Main>
 
       <Footer />
