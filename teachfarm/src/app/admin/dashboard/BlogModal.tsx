@@ -54,20 +54,20 @@ export function BlogModal({ isOpen, onClose, onSubmit, initialData }: BlogModalP
         if (!file) return;
 
         setIsUploading(true);
-        const formDataUpload = new FormData();
-        formDataUpload.append('file', file);
 
         try {
-            const token = localStorage.getItem('admin_token');
-            const response = await axios.post(`${API_BASE_URL.replace('/api', '')}/upload`, formDataUpload, {
-                headers: { 
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
-                }
+            const response = await fetch(`/api/upload?filename=${file.name}`, {
+                method: 'POST',
+                body: file,
             });
-            setFormData(prev => ({ ...prev, featured_image: response.data.url }));
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            const blob = await response.json();
+            setFormData(prev => ({ ...prev, featured_image: blob.url }));
             toast.success('Image uploaded!');
         } catch (error) {
+            console.error('Upload error:', error);
             toast.error('Upload failed');
         } finally {
             setIsUploading(false);
