@@ -117,9 +117,14 @@ export default function RootLayout({
         {/* Apple Touch Icon */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.ico" sizes="180x180" />
 
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <Script
           id="json-ld"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
@@ -136,10 +141,6 @@ export default function RootLayout({
             gtag('config', 'G-KLX1XTXXZM');
           `}
         </Script>
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
         <ReactQueryProvider>
           {children}
           <Toaster richColors position="top-right" />
