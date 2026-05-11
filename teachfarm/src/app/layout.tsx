@@ -117,17 +117,6 @@ export default function RootLayout({
         {/* Apple Touch Icon */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.ico" sizes="180x180" />
 
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Script
-          id="json-ld"
-          type="application/ld+json"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-
         {/* Google Analytics GA4 */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-KLX1XTXXZM"
@@ -138,11 +127,19 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-KLX1XTXXZM', {
-              page_path: window.location.pathname,
-            });
+            gtag('config', 'G-KLX1XTXXZM');
           `}
         </Script>
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ReactQueryProvider>
           {children}
           <Toaster richColors position="top-right" />
