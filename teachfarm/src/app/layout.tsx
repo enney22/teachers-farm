@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     google: 'google56c96dae71c12d0e',
   },
   alternates: {
-    canonical: '/',
+    canonical: 'https://www.teachersfarm.com',
   },
 };
 
